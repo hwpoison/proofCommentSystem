@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import hashlib, base64, random, string
 
 class ProofCommentSystem:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.hash_function = hashlib.sha3_224
         self.passphrase_len : int = 10
-        self.current_proof : str = None
+        self.current_proof : str = str()
         self.current_passphrase : str = self.gen_rand_passphrase(self.passphrase_len)
 
     def gen_rand_passphrase(self, length : int) -> str:
@@ -13,16 +15,16 @@ class ProofCommentSystem:
         password = ''.join(random.choice(characters) for _ in range(length))
         return password
 
-    def hash(self, passphrase) -> str:
-        return self.hash_function(f"{passphrase}".encode()).hexdigest()
+    def hash(self, passphrase : str) -> hashlib._Hash:
+        return self.hash_function(f"{passphrase}".encode())
 
     def serialize_data(self, proof : str, passphrase : str) -> str:
-        data = f"{proof} * {passphrase}"
+        data = f"{ proof } * {passphrase}"
         return base64.b64encode(data.encode()).decode()
 
-    def deserealize_data(self, payload):
-        payload = base64.b64decode(payload.encode())
-        data = payload.decode().split(" * ")
+    def deserealize_data(self, payload : str):
+        decoded_payload = base64.b64decode(payload.encode())
+        data = decoded_payload.decode().split(" * ")
         if len(data) == 2:
             return data 
         else:
@@ -33,7 +35,7 @@ class ProofCommentSystem:
         try:
             proof_to_solve = self.deserealize_data(current_payload)[0]
             to_use_key = self.deserealize_data(prev_payload)[1]
-            same = self.hash(to_use_key) == proof_to_solve
+            same = self.hash(to_use_key).hexdigest() == proof_to_solve
             if same:
                 print("Is the same guy!!")
             else:
@@ -43,7 +45,7 @@ class ProofCommentSystem:
 
 
     def add_comment(self, comment : str) -> str:
-        passphrase = None
+        passphrase : str = str()
 
         # If a proof was hashed previously
         if self.current_proof:
@@ -53,11 +55,9 @@ class ProofCommentSystem:
             self.current_passphrase = self.gen_rand_passphrase(self.passphrase_len)
 
         # Hash the current passpharse
-        proof = self.hash(self.current_passphrase)
+        proof = self.hash(self.current_passphrase).hexdigest()
 
         # Show the current proof and the passphrase for solve the previous proof
-        
-
         payload = self.serialize_data(proof, passphrase)
         full_comment = f"{comment} #{payload}"
 
