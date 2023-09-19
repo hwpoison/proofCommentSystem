@@ -8,9 +8,9 @@ class ProofCommentSystem:
         self.hash_function = hashlib.sha3_224
         self.passphrase_len : int = 10
         self.current_proof : str = str()
-        self.current_passphrase : str = self.generate_random_passphrase(self.passphrase_len)
+        self.current_passphrase : str = self.generate_passphrase(self.passphrase_len)
 
-    def generate_random_passphrase(self, length : int) -> str:
+    def generate_passphrase(self, length : int) -> str:
         characters = string.ascii_letters + string.digits + string.punctuation
         password = ''.join(random.choice(characters) for _ in range(length))
         return password
@@ -52,7 +52,7 @@ class ProofCommentSystem:
             # integrity = self.hash() == self.current_proof
             passphrase = self.current_passphrase 
             # Regenerate passphrase
-            self.current_passphrase = self.generate_random_passphrase(self.passphrase_len)
+            self.current_passphrase = self.generate_passphrase(self.passphrase_len)
 
         # Hash the current passpharse
         proof = self.hash(self.current_passphrase).hexdigest()
